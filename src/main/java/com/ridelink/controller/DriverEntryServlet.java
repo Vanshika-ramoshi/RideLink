@@ -1,0 +1,62 @@
+package com.ridelink.controller;
+
+import java.io.IOException;
+
+import com.ridelink.model.Driver;
+import com.ridelink.model.User;
+import com.ridelink.service.DriverService;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
+@WebServlet("/driver/entry")
+public class DriverEntryServlet extends HttpServlet {
+
+	private DriverService driverService;
+
+	@Override
+	public void init() {
+
+		driverService = new DriverService();
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+
+		HttpSession session = request.getSession(false);
+
+		if (session == null) {
+
+			response.sendRedirect(request.getContextPath() + "/login.jsp");
+
+			return;
+		}
+
+		User user = (User) session.getAttribute("user");
+
+		if (user == null) {
+
+			response.sendRedirect(request.getContextPath() + "/login.jsp");
+
+			return;
+		}
+
+		int userId = user.getUserId();
+
+		Driver driver = driverService.getDriverByUserId(userId);
+
+		if (driver != null) {
+
+			response.sendRedirect(request.getContextPath() + "/driver/dashboard");
+
+			return;
+		}
+
+		request.getRequestDispatcher("/driver/register.jsp").forward(request, response);
+	}
+}
